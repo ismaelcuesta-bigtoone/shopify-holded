@@ -25,10 +25,11 @@ export const procesarChartOfAccount = async (cuenta) => {
     const chartName = cuenta.name;
     let chartId = null;
 
-    const chartsResp = await fetch(`${ACCOUNTING_URL}/chartofaccounts`, {
+    const chartsResp = await fetch(`${ACCOUNTING_URL}/chartofaccounts?includeempty=true`, {
         method: "GET",
         headers: { key: HOLDED_API_KEY }
     });
+
     const charts = await chartsResp.json();
     const chartExistente = Array.isArray(charts)
     ? charts.find(c => c.name?.toLowerCase() === chartName.toLowerCase())
