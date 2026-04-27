@@ -1,0 +1,21 @@
+{
+  "name": "shopify-holded-2",
+  "version": "1.0.0",
+  "description": "Integración de Webhooks de Shopify con Holded y AWS",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "deploy": "serverless deploy"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.893.0",
+    "@aws-sdk/client-s3": "^3.893.0",
+    "@aws-sdk/lib-dynamodb": "^3.893.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.2",
+    "node-fetch": "^2.7.0",
+    "serverless-http": "^3.2.0"
+  }
+}

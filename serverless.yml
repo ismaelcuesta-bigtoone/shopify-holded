@@ -1,0 +1,78 @@
+service: shopify-holded-2
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  environment:
+    HOLDED_API_KEY: ${env:HOLDED_API_KEY}
+    ACCOUNTING_URL: ${env:ACCOUNTING_URL}
+    INVOICING_URL: ${env:INVOICING_URL}
+    BUCKET_NAME: ${env:BUCKET_NAME}
+    TABLE_PROD: TablaProductos
+    TABLE_PED: TablaPedidos
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:GetItem
+        - dynamodb:Scan
+      Resource:
+        - arn:aws:dynamodb:us-east-1:*:table/TablaProductos
+        - arn:aws:dynamodb:us-east-1:*:table/TablaPedidos
+    - Effect: Allow
+      Action:
+        - s3:PutObject
+        - s3:GetObject
+      Resource:
+        - arn:aws:s3:::${env:BUCKET_NAME}/*
+
+functions:
+  webhookShopify:
+    handler: index.handler
+    events:
+      - httpApi:
+          path: /webhook-shopify
+          method: post
+
+resources:
+  Resources:
+    ProductosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TablaProductos
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: sku
+            AttributeType: S
+        KeySchema:
+          - AttributeName: sku
+            KeyType: HASH
+    PedidosTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TablaPedidos
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: pedidoId
+            AttributeType: S
+          - AttributeName: sku
+            AttributeType: S
+        KeySchema:
+          - AttributeName: pedidoId
+            KeyType: HASH
+          - AttributeName: sku
+            KeyType: RANGE
+    ShopifyBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: ${env:BUCKET_NAME}
+        LifecycleConfiguration:
+          Rules:
+            - Id: DeleteOldData
+              Status: Enabled
+              Prefix: ""
+              ExpirationInDays: 30
